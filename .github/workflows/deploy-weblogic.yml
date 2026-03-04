@@ -68,17 +68,31 @@ jobs:
         run: |
           set -euo pipefail
           REMOTE="${{ secrets.WLS_USER }}@${{ secrets.WLS_HOST }}"
-          ssh -i ~/.ssh/id_rsa "$REMOTE" "mkdir -p '${{ secrets.REMOTE_DEPLOY_DIR }}'"
-          scp -i ~/.ssh/id_rsa ./artifact/bosung-app.war "$REMOTE:${{ secrets.REMOTE_WAR_PATH }}"
-          scp -i ~/.ssh/id_rsa ./deploy/deploy_remote.sh "$REMOTE:${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}"
-          ssh -i ~/.ssh/id_rsa "$REMOTE" "chmod +x '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'"
+          ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" "mkdir -p '${{ secrets.REMOTE_DEPLOY_DIR }}'"
+          scp -o BatchMode=yes -i ~/.ssh/id_rsa ./artifact/bosung-app.war "$REMOTE:${{ secrets.REMOTE_WAR_PATH }}"
+          scp -o BatchMode=yes -i ~/.ssh/id_rsa ./deploy/deploy_remote.sh "$REMOTE:${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}"
+          ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" "chmod +x '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'"
+
+      - name: Debug remote files and paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          REMOTE="${{ secrets.WLS_USER }}@${{ secrets.WLS_HOST }}"
+          ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" \
+            "set -e; \
+             ls -ld '${{ secrets.REMOTE_DEPLOY_DIR }}'; \
+             ls -l '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'; \
+             ls -l '${{ secrets.REMOTE_WAR_PATH }}'; \
+             ls -l '${{ secrets.BOOT_PROPERTIES_PATH }}'; \
+             test -d '${{ secrets.DOMAIN_HOME }}'; \
+             echo '[debug] DOMAIN_HOME exists: ${{ secrets.DOMAIN_HOME }}'"
 
       - name: Execute remote WebLogic deploy
         shell: bash
         run: |
           set -euo pipefail
           REMOTE="${{ secrets.WLS_USER }}@${{ secrets.WLS_HOST }}"
-          ssh -i ~/.ssh/id_rsa "$REMOTE" \
+          ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" \
             "bash '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}' \
             '${{ secrets.DOMAIN_HOME }}' \
             '${{ secrets.ADMIN_URL }}' \
