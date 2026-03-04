@@ -55,12 +55,48 @@ BASE_CMD=(
   -upload
 )
 
+run_with_lock_retry() {
+  local action="$1"
+  local max_attempts="${2:-8}"
+  local sleep_seconds="${3:-15}"
+  local attempt=1
+
+  while [ "$attempt" -le "$max_attempts" ]; do
+    echo "[deploy] ${action} attempt ${attempt}/${max_attempts}"
+
+    set +e
+    local output
+    output="$("${BASE_CMD[@]}" "-${action}" 2>&1)"
+    local rc=$?
+    set -e
+
+    printf '%s\n' "$output"
+
+    if [ "$rc" -eq 0 ]; then
+      return 0
+    fi
+
+    if printf '%s' "$output" | grep -qiE 'Deployer:149163|edit lock is owned by another session'; then
+      if [ "$attempt" -lt "$max_attempts" ]; then
+        echo "[deploy] edit lock busy. retry after ${sleep_seconds}s..."
+        sleep "$sleep_seconds"
+        attempt=$((attempt + 1))
+        continue
+      fi
+    fi
+
+    return "$rc"
+  done
+
+  return 1
+}
+
 echo "[deploy] trying redeploy"
-if "${BASE_CMD[@]}" -redeploy; then
+if run_with_lock_retry "redeploy" 8 15; then
   echo "[deploy] redeploy success"
   exit 0
 fi
 
 echo "[deploy] redeploy failed; trying fresh deploy"
-"${BASE_CMD[@]}" -deploy
+run_with_lock_retry "deploy" 8 15
 echo "[deploy] deploy success"
