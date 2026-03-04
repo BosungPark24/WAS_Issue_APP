@@ -31,11 +31,21 @@ if [ ! -f "$BOOT_PROPERTIES_PATH" ]; then
   exit 1
 fi
 
-WLS_USER="$(grep '^username=' "$BOOT_PROPERTIES_PATH" | head -n1 | cut -d'=' -f2-)"
-WLS_PW="$(grep '^password=' "$BOOT_PROPERTIES_PATH" | head -n1 | cut -d'=' -f2-)"
+WLS_USER_LINE="$(grep -E '^[[:space:]]*username[[:space:]]*=' "$BOOT_PROPERTIES_PATH" | head -n1 || true)"
+WLS_PW_LINE="$(grep -E '^[[:space:]]*password[[:space:]]*=' "$BOOT_PROPERTIES_PATH" | head -n1 || true)"
+
+WLS_USER="${WLS_USER_LINE#*=}"
+WLS_PW="${WLS_PW_LINE#*=}"
+
+# Trim leading/trailing spaces
+WLS_USER="$(printf '%s' "$WLS_USER" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+WLS_PW="$(printf '%s' "$WLS_PW" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
 
 if [ -z "$WLS_USER" ] || [ -z "$WLS_PW" ]; then
   echo "[deploy] username/password not found in boot.properties"
+  echo "[deploy] boot.properties path: $BOOT_PROPERTIES_PATH"
+  echo "[deploy] file preview:"
+  sed -n '1,20p' "$BOOT_PROPERTIES_PATH" | sed 's/password=.*/password=***MASKED***/'
   exit 1
 fi
 
