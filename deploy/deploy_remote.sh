@@ -51,12 +51,22 @@ fi
 
 # weblogic.Deployer often requires plaintext password.
 # If password is encrypted ({AES}...), this can fail depending on environment.
-if [[ "$WLS_PW" == \{AES\}* ]]; then
-  echo "[deploy] WARNING: boot.properties password looks encrypted ({AES}...)."
+if [[ "$WLS_PW" == \{AES* ]]; then
+  echo "[deploy] WARNING: boot.properties password looks encrypted ({AES...})."
   echo "[deploy] If deploy fails with auth error, use userConfig/userKey or plaintext CI secret."
 fi
 
-source "$DOMAIN_HOME/bin/setDomainEnv.sh" >/dev/null 2>&1 || true
+# setDomainEnv.sh can fail under strict shell flags in non-interactive CI.
+set +e +u
+# shellcheck disable=SC1090
+source "$DOMAIN_HOME/bin/setDomainEnv.sh"
+SETDOMAIN_RC=$?
+set -euo pipefail
+
+if [ "$SETDOMAIN_RC" -ne 0 ]; then
+  echo "[deploy] WARNING: setDomainEnv.sh returned non-zero ($SETDOMAIN_RC)"
+  echo "[deploy] continuing; if weblogic.Deployer class not found, verify DOMAIN_HOME and env script."
+fi
 
 BASE_CMD=(
   java weblogic.Deployer
