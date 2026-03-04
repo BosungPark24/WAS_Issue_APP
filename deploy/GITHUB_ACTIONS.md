@@ -4,7 +4,7 @@
 Push to `main` triggers:
 1. Build `target/bosung-app.war`
 2. Upload WAR to `10.20.210.239`
-3. Copy WAR into Tomcat `webapps` via remote deploy script
+3. Deploy by replacing `REMOTE_WAR_PATH` via remote deploy script
 
 Workflow file:
 - `.github/workflows/deploy-weblogic.yml` (name changed to "Deploy to Tomcat")
@@ -27,16 +27,14 @@ Set in: `Repo Settings > Secrets and variables > Actions`
 - `REMOTE_DEPLOY_DIR` (example: `/home/bs.park2/deployments/bosung-app`)
 - `REMOTE_WAR_PATH` (example: `/home/bs.park2/deployments/bosung-app/bosung-app.war`)
 - `REMOTE_DEPLOY_SCRIPT_PATH` (example: `/home/bs.park2/deployments/bosung-app/deploy_remote_tomcat.sh`)
-- `TOMCAT_WEBAPPS_DIR` (example: `/home/bs.park2/apache-tomcat-9.0.xx/webapps`)
-- `APP_CONTEXT_NAME` (example: `was-issue-test`)
 
 ## First run checklist
 1. Confirm self-hosted runner is online with labels `self-hosted`, `linux`
 2. Confirm SSH key login works from runner host
-3. Confirm `TOMCAT_WEBAPPS_DIR` is writable by `WLS_USER`
+3. Confirm directory of `REMOTE_WAR_PATH` is writable by `WLS_USER`
 4. Push to `main` or trigger `workflow_dispatch`
 5. Verify app URL:
-   - `http://10.20.210.239:8080/<APP_CONTEXT_NAME>/`
+   - `http://10.20.210.239:8080/was-issue-test/` (or your actual context)
 
 ## Kubernetes?
 Not required for current architecture (single Tomcat server deployment).

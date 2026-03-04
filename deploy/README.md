@@ -52,3 +52,4 @@ If you want CI/CD from GitHub push, use:
 
 Current GitHub workflow deploys to Tomcat webapps using:
 - `deploy/deploy_remote_tomcat.sh`
+and replaces the artifact at `REMOTE_WAR_PATH`.

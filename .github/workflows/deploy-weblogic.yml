@@ -68,8 +68,9 @@ jobs:
         run: |
           set -euo pipefail
           REMOTE="${{ secrets.WLS_USER }}@${{ secrets.WLS_HOST }}"
+          REMOTE_WAR_TMP_PATH="${{ secrets.REMOTE_WAR_PATH }}.upload"
           ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" "mkdir -p '${{ secrets.REMOTE_DEPLOY_DIR }}'"
-          scp -o BatchMode=yes -i ~/.ssh/id_rsa ./artifact/bosung-app.war "$REMOTE:${{ secrets.REMOTE_WAR_PATH }}"
+          scp -o BatchMode=yes -i ~/.ssh/id_rsa ./artifact/bosung-app.war "$REMOTE:${REMOTE_WAR_TMP_PATH}"
           scp -o BatchMode=yes -i ~/.ssh/id_rsa ./deploy/deploy_remote_tomcat.sh "$REMOTE:${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}"
           ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" "chmod +x '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'"
 
@@ -82,9 +83,9 @@ jobs:
             "set -e; \
              ls -ld '${{ secrets.REMOTE_DEPLOY_DIR }}'; \
              ls -l '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'; \
-             ls -l '${{ secrets.REMOTE_WAR_PATH }}'; \
-             test -d '${{ secrets.TOMCAT_WEBAPPS_DIR }}'; \
-             echo '[debug] TOMCAT_WEBAPPS_DIR exists: ${{ secrets.TOMCAT_WEBAPPS_DIR }}'"
+             ls -l '${{ secrets.REMOTE_WAR_PATH }}' 2>/dev/null || true; \
+             ls -l '${{ secrets.REMOTE_WAR_PATH }}.upload'; \
+             echo '[debug] REMOTE_WAR_PATH target: ${{ secrets.REMOTE_WAR_PATH }}'"
 
       - name: Execute remote Tomcat deploy
         shell: bash
@@ -93,6 +94,5 @@ jobs:
           REMOTE="${{ secrets.WLS_USER }}@${{ secrets.WLS_HOST }}"
           ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" \
             "bash -x '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}' \
-            '${{ secrets.REMOTE_WAR_PATH }}' \
-            '${{ secrets.TOMCAT_WEBAPPS_DIR }}' \
-            '${{ secrets.APP_CONTEXT_NAME }}'"
+            '${{ secrets.REMOTE_WAR_PATH }}.upload' \
+            '${{ secrets.REMOTE_WAR_PATH }}'"
