@@ -34,7 +34,8 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    # Internal WebLogic host usually requires a runner inside private network.
+    runs-on: [self-hosted, linux]
     environment: production
     steps:
       - name: Checkout

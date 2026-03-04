@@ -15,6 +15,9 @@ Use one of these:
 1. Self-hosted GitHub Runner inside your network
 2. VPN/Direct connectivity from runner to server
 
+Current workflow is configured for:
+- `runs-on: [self-hosted, linux]` in deploy job
+
 ## Required GitHub Secrets
 Set in: `Repo Settings > Secrets and variables > Actions`
 
@@ -33,9 +36,10 @@ Set in: `Repo Settings > Secrets and variables > Actions`
 
 ## First run checklist
 1. Confirm server-side `userConfig/userKey` files exist (`deploy/FIRST_TIME_SETUP.md`)
-2. Confirm SSH key login works from runner host
-3. Push to `main` or trigger `workflow_dispatch`
-4. Verify Actions logs and open app URL after deploy
+2. Confirm self-hosted runner is online with labels `self-hosted`, `linux`
+3. Confirm SSH key login works from runner host
+4. Push to `main` or trigger `workflow_dispatch`
+5. Verify Actions logs and open app URL after deploy
 
 ## Kubernetes?
 Not required for your current target architecture (existing WebLogic on VM/server).
