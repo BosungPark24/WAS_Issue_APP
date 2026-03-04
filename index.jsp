@@ -85,6 +85,10 @@
             운영 환경에서는 절대 사용하지 마세요. 테스트 환경에서만 사용하시기 바랍니다.
         </div>
         
+        <div class="info" style="border-left-color:#4CAF50;">
+            <strong>REDEPLOY CHECK:</strong> DEPLOY_CHECK_20260304_02
+        </div>
+
         <div class="info">
             <strong>JDK 버전:</strong> <%= System.getProperty("java.version") %><br>
             <strong>서버 정보:</strong> <%= application.getServerInfo() %><br>
