@@ -1,0 +1,3 @@
+target/
+run-logs/
+deploy/deploy-config.ps1

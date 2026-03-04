@@ -1,0 +1,11 @@
+services:
+  bosung-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bosung-app
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      - JAVA_TOOL_OPTIONS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=70

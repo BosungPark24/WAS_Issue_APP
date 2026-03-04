@@ -1,0 +1,6 @@
+target
+run-logs
+.vscode
+.git
+.gitignore
+deploy/deploy-config.ps1
