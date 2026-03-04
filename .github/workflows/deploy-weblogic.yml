@@ -1,4 +1,4 @@
-name: Deploy to WebLogic
+name: Deploy to Tomcat
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-weblogic-prod
+  group: deploy-tomcat-prod
   cancel-in-progress: false
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
 
   deploy:
     needs: build
-    # Internal WebLogic host usually requires a runner inside private network.
+    # Internal host usually requires a runner inside private network.
     runs-on: [self-hosted, linux]
     environment: production
     steps:
@@ -70,7 +70,7 @@ jobs:
           REMOTE="${{ secrets.WLS_USER }}@${{ secrets.WLS_HOST }}"
           ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" "mkdir -p '${{ secrets.REMOTE_DEPLOY_DIR }}'"
           scp -o BatchMode=yes -i ~/.ssh/id_rsa ./artifact/bosung-app.war "$REMOTE:${{ secrets.REMOTE_WAR_PATH }}"
-          scp -o BatchMode=yes -i ~/.ssh/id_rsa ./deploy/deploy_remote.sh "$REMOTE:${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}"
+          scp -o BatchMode=yes -i ~/.ssh/id_rsa ./deploy/deploy_remote_tomcat.sh "$REMOTE:${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}"
           ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" "chmod +x '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'"
 
       - name: Debug remote files and paths
@@ -83,20 +83,16 @@ jobs:
              ls -ld '${{ secrets.REMOTE_DEPLOY_DIR }}'; \
              ls -l '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'; \
              ls -l '${{ secrets.REMOTE_WAR_PATH }}'; \
-             test -d '${{ secrets.DOMAIN_HOME }}'; \
-             echo '[debug] DOMAIN_HOME exists: ${{ secrets.DOMAIN_HOME }}'"
+             test -d '${{ secrets.TOMCAT_WEBAPPS_DIR }}'; \
+             echo '[debug] TOMCAT_WEBAPPS_DIR exists: ${{ secrets.TOMCAT_WEBAPPS_DIR }}'"
 
-      - name: Execute remote WebLogic deploy
+      - name: Execute remote Tomcat deploy
         shell: bash
         run: |
           set -euo pipefail
           REMOTE="${{ secrets.WLS_USER }}@${{ secrets.WLS_HOST }}"
           ssh -o BatchMode=yes -i ~/.ssh/id_rsa "$REMOTE" \
             "bash -x '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}' \
-            '${{ secrets.DOMAIN_HOME }}' \
-            '${{ secrets.ADMIN_URL }}' \
-            '${{ secrets.APP_NAME }}' \
-            '${{ secrets.TARGET_NAME }}' \
             '${{ secrets.REMOTE_WAR_PATH }}' \
-            '${{ secrets.WLS_ADMIN_USER }}' \
-            '${{ secrets.WLS_ADMIN_PASSWORD }}'"
+            '${{ secrets.TOMCAT_WEBAPPS_DIR }}' \
+            '${{ secrets.APP_CONTEXT_NAME }}'"

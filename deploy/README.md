@@ -50,4 +50,5 @@ If you want CI/CD from GitHub push, use:
 - `.github/workflows/deploy-weblogic.yml`
 - `deploy/GITHUB_ACTIONS.md`
 
-Current GitHub workflow passes `BOOT_PROPERTIES_PATH` to remote deploy script.
+Current GitHub workflow deploys to Tomcat webapps using:
+- `deploy/deploy_remote_tomcat.sh`
