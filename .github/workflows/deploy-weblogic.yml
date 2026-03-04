@@ -83,7 +83,6 @@ jobs:
              ls -ld '${{ secrets.REMOTE_DEPLOY_DIR }}'; \
              ls -l '${{ secrets.REMOTE_DEPLOY_SCRIPT_PATH }}'; \
              ls -l '${{ secrets.REMOTE_WAR_PATH }}'; \
-             ls -l '${{ secrets.BOOT_PROPERTIES_PATH }}'; \
              test -d '${{ secrets.DOMAIN_HOME }}'; \
              echo '[debug] DOMAIN_HOME exists: ${{ secrets.DOMAIN_HOME }}'"
 
@@ -99,4 +98,5 @@ jobs:
             '${{ secrets.APP_NAME }}' \
             '${{ secrets.TARGET_NAME }}' \
             '${{ secrets.REMOTE_WAR_PATH }}' \
-            '${{ secrets.BOOT_PROPERTIES_PATH }}'"
+            '${{ secrets.WLS_ADMIN_USER }}' \
+            '${{ secrets.WLS_ADMIN_PASSWORD }}'"
