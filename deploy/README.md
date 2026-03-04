@@ -49,3 +49,5 @@ bash /home/weblogic/deployments/bosung-app/deploy_remote.sh \
 If you want CI/CD from GitHub push, use:
 - `.github/workflows/deploy-weblogic.yml`
 - `deploy/GITHUB_ACTIONS.md`
+
+Current GitHub workflow passes `BOOT_PROPERTIES_PATH` to remote deploy script.

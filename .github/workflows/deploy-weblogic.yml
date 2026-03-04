@@ -78,5 +78,4 @@ jobs:
             '${{ secrets.APP_NAME }}' \
             '${{ secrets.TARGET_NAME }}' \
             '${{ secrets.REMOTE_WAR_PATH }}' \
-            '${{ secrets.WLS_USER_CONFIG_FILE }}' \
-            '${{ secrets.WLS_USER_KEY_FILE }}'"
+            '${{ secrets.BOOT_PROPERTIES_PATH }}'"

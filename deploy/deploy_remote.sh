@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$#" -ne 7 ]; then
-  echo "usage: $0 <DOMAIN_HOME> <ADMIN_URL> <APP_NAME> <TARGET_NAME> <WAR_PATH> <USER_CONFIG_FILE> <USER_KEY_FILE>"
+# usage:
+#   deploy_remote.sh <DOMAIN_HOME> <ADMIN_URL> <APP_NAME> <TARGET_NAME> <WAR_PATH> <BOOT_PROPERTIES_PATH>
+
+if [ "$#" -ne 6 ]; then
+  echo "usage: $0 <DOMAIN_HOME> <ADMIN_URL> <APP_NAME> <TARGET_NAME> <WAR_PATH> <BOOT_PROPERTIES_PATH>"
   exit 1
 fi
 
@@ -11,8 +14,7 @@ ADMIN_URL="$2"
 APP_NAME="$3"
 TARGET_NAME="$4"
 WAR_PATH="$5"
-USER_CONFIG_FILE="$6"
-USER_KEY_FILE="$7"
+BOOT_PROPERTIES_PATH="$6"
 
 if [ ! -d "$DOMAIN_HOME" ]; then
   echo "[deploy] DOMAIN_HOME not found: $DOMAIN_HOME"
@@ -24,9 +26,24 @@ if [ ! -f "$WAR_PATH" ]; then
   exit 1
 fi
 
-if [ ! -f "$USER_CONFIG_FILE" ] || [ ! -f "$USER_KEY_FILE" ]; then
-  echo "[deploy] WebLogic user config/key file missing"
+if [ ! -f "$BOOT_PROPERTIES_PATH" ]; then
+  echo "[deploy] boot.properties not found: $BOOT_PROPERTIES_PATH"
   exit 1
+fi
+
+WLS_USER="$(grep '^username=' "$BOOT_PROPERTIES_PATH" | head -n1 | cut -d'=' -f2-)"
+WLS_PW="$(grep '^password=' "$BOOT_PROPERTIES_PATH" | head -n1 | cut -d'=' -f2-)"
+
+if [ -z "$WLS_USER" ] || [ -z "$WLS_PW" ]; then
+  echo "[deploy] username/password not found in boot.properties"
+  exit 1
+fi
+
+# weblogic.Deployer often requires plaintext password.
+# If password is encrypted ({AES}...), this can fail depending on environment.
+if [[ "$WLS_PW" == \{AES\}* ]]; then
+  echo "[deploy] WARNING: boot.properties password looks encrypted ({AES}...)."
+  echo "[deploy] If deploy fails with auth error, use userConfig/userKey or plaintext CI secret."
 fi
 
 source "$DOMAIN_HOME/bin/setDomainEnv.sh" >/dev/null 2>&1 || true
@@ -34,8 +51,8 @@ source "$DOMAIN_HOME/bin/setDomainEnv.sh" >/dev/null 2>&1 || true
 BASE_CMD=(
   java weblogic.Deployer
   -adminurl "$ADMIN_URL"
-  -userconfigfile "$USER_CONFIG_FILE"
-  -userkeyfile "$USER_KEY_FILE"
+  -username "$WLS_USER"
+  -password "$WLS_PW"
   -name "$APP_NAME"
   -source "$WAR_PATH"
   -targets "$TARGET_NAME"

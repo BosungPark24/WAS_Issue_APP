@@ -31,15 +31,21 @@ Set in: `Repo Settings > Secrets and variables > Actions`
 - `ADMIN_URL` (example: `t3://10.20.210.239:7001`)
 - `APP_NAME` (example: `bosung-app`)
 - `TARGET_NAME` (example: `AdminServer` or cluster name)
-- `WLS_USER_CONFIG_FILE` (example: `/home/weblogic/.wls/userConfig.secure`)
-- `WLS_USER_KEY_FILE` (example: `/home/weblogic/.wls/userKey.secure`)
+- `BOOT_PROPERTIES_PATH` (example: `/u01/oracle/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties`)
 
 ## First run checklist
-1. Confirm server-side `userConfig/userKey` files exist (`deploy/FIRST_TIME_SETUP.md`)
+1. Confirm `BOOT_PROPERTIES_PATH` exists on target server
 2. Confirm self-hosted runner is online with labels `self-hosted`, `linux`
 3. Confirm SSH key login works from runner host
 4. Push to `main` or trigger `workflow_dispatch`
 5. Verify Actions logs and open app URL after deploy
+
+## boot.properties caution
+`weblogic.Deployer` commonly expects plaintext password.
+If `boot.properties` contains encrypted password (`{AES}...`), authentication may fail.
+In that case, switch to:
+1. `userConfig/userKey` 방식
+2. 또는 GitHub Secret 기반 plaintext 계정/비밀번호 전달
 
 ## Kubernetes?
 Not required for your current target architecture (existing WebLogic on VM/server).
